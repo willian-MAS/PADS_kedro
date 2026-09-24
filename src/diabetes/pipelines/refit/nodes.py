@@ -1,10 +1,4 @@
-"""Nos da pipeline de refit.
-
-Por que refit? Durante a modelagem, tudo e ajustado somente no split de treino,
-para que a avaliacao seja honesta. Depois de validada a abordagem, os artefatos
-que vao para producao sao reajustados com TODOS os dados disponiveis: mesma
-classe de modelo, mesmos hiperparametros vencedores, mais dados.
-"""
+"""Refit do modelo campeao usando todos os splits."""
 
 import logging
 from typing import Any
@@ -23,9 +17,6 @@ def refit_model(
     params: dict[str, Any],
 ) -> dict[str, Any]:
     """Retreina o modelo otimizado em todos os splits, para producao.
-
-    Extrai a classe e os hiperparametros vencedores do artefato
-    ``optimized_model`` e ajusta uma instancia nova nos splits indicados.
 
     Args:
         master_table: DataFrame processado, com a coluna ``split``.

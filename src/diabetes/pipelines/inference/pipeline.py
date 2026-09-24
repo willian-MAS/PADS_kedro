@@ -1,19 +1,4 @@
-"""Pipeline de inferencia.
-
-Reaproveita seis nos da data_engineering com os artefatos de PRODUCAO.
-Nenhum ``fit`` acontece aqui.
-
-DAG:
-
-    raw_inference_data      -> [to_dataframe]            -> raw_inference_dataframe
-    raw_inference_dataframe -> [clean_inference_data]    -> cleaned_inference_data
-    cleaned + imputers      -> [impute_inference_data]   -> imputed_inference_data
-    imputed + thresholds    -> [clip_inference_data]     -> clipped_inference_data
-    clipped                 -> [engineer_inference_...]  -> featured_inference_data
-    featured + encoders     -> [encode_inference_data]   -> encoded_inference_data
-    encoded + scalers       -> [scale_inference_data]    -> scaled_inference_data
-    production_model + dado -> [predict]                 -> inference_predictions
-"""
+"""Pipeline de inferencia, usando os artefatos de producao."""
 
 from kedro.pipeline import Node, Pipeline
 

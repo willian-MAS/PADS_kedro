@@ -1,19 +1,4 @@
-"""Pipeline de engenharia de dados.
-
-DAG (o Kedro infere a ordem pelos nomes de entrada e saida):
-
-    raw_diabetes_data      -> [clean_data]                  -> cleaned_diabetes_data
-    cleaned_diabetes_data  -> [add_split_column]            -> split_diabetes_data
-    split_diabetes_data    -> [fit_imputers]                -> modelling_imputers
-    split + imputers       -> [impute_missing_values]       -> imputed_diabetes_data
-    imputed                -> [fit_outlier_thresholds]      -> modelling_outlier_thresholds
-    imputed + thresholds   -> [clip_outliers]               -> clipped_diabetes_data
-    clipped                -> [add_engineered_features]     -> featured_diabetes_data
-    featured               -> [fit_encoders]                -> modelling_encoders
-    featured + encoders    -> [encode_categorical_features] -> encoded_diabetes_data
-    encoded                -> [fit_scalers]                 -> modelling_scalers
-    encoded + scalers      -> [scale_numerical_features]    -> master_table
-"""
+"""Pipeline de engenharia de dados."""
 
 from kedro.pipeline import Node, Pipeline
 

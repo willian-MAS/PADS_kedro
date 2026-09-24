@@ -1,10 +1,4 @@
-"""Testes da API FastAPI.
-
-Usam o TestClient do FastAPI, que sobe a aplicacao em memoria -- nao e preciso
-rodar o uvicorn para testar. Os testes de dados e de inferencia dependem dos
-artefatos de producao; se eles ainda nao existirem (projeto recem-clonado, sem
-`kedro run`), o teste e pulado em vez de falhar.
-"""
+"""Testes da API com o TestClient do FastAPI."""
 
 import pytest
 from fastapi.testclient import TestClient
@@ -146,12 +140,7 @@ class TestInferenciaOnline:
 
 
 class TestExecucoesEmSegundoPlano:
-    """O disparo em segundo plano e testado com o executor trocado por um dublê.
-
-    Assim validamos a mecanica do endpoint (run_id, rastreamento, 404) sem
-    rodar o pipeline de verdade e sobrescrever os dados do projeto.
-    """
-
+    # troca o executor para nao rodar o pipeline de verdade durante o teste
     @pytest.fixture(autouse=True)
     def _executor_falso(self, monkeypatch):
         def _executor(run_id: str, pipeline_names: list[str]) -> None:

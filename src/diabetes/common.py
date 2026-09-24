@@ -1,8 +1,4 @@
-"""Utilidades compartilhadas pelas pipelines.
-
-Duas funcoes pequenas que aparecem em mais de uma pipeline: resolver grupos de
-colunas declarados no YAML e carregar uma classe a partir do seu caminho.
-"""
+"""Funcoes auxiliares usadas por mais de uma pipeline."""
 
 import importlib
 from typing import Any

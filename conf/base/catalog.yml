@@ -1,13 +1,5 @@
-# =============================================================================
-# Data Catalog -- a interface (contrato) entre os nos e o armazenamento
-# =============================================================================
-# Nenhum no chama pd.read_csv() ou pd.to_csv(): quem resolve I/O e o catalogo.
-# Trocar CSV por Parquet, ou local por S3/GCS, e mudanca de YAML.
-#
-# Camadas: 01_raw (imutavel) -> 02_intermediate (limpo) -> 03_primary (com
-# split) -> 04_feature (imputado, clipado, com features e encodado) ->
-# 05_model_input (master table escalada) -> 06_models (artefatos) ->
-# 07_model_output (predicoes) -> 08_reporting (metricas).
+# Camadas: 01_raw -> 02_intermediate -> 03_primary -> 04_feature -> 05_model_input
+# -> 06_models -> 07_model_output -> 08_reporting
 
 # -----------------------------------------------------------------------------
 # Pipeline: data_engineering (treino)
@@ -137,10 +129,7 @@ production_model:
 # -----------------------------------------------------------------------------
 # Pipeline: inference
 # -----------------------------------------------------------------------------
-# Obs.: `raw_inference_dataframe` NAO esta no catalogo de proposito. Sem
-# entrada, o Kedro usa um MemoryDataset -- e esse e o ponto de injecao usado
-# pela API (FastAPI) para servir inferencia online com a MESMA pipeline do
-# modo batch.
+# raw_inference_dataframe fica fora do catalogo (MemoryDataset), a API usa isso
 raw_inference_data:
   type: pandas.CSVDataset
   filepath: data/01_raw/diabetes-dataset-inference.csv

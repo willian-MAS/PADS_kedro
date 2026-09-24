@@ -1,15 +1,4 @@
-"""Pipeline de modelagem.
-
-DAG:
-
-    master_table -> [train_baseline_model]      -> baseline_model
-    baseline     -> [evaluate_baseline_model]   -> baseline_metrics
-    master_table -> [optimize_hyperparameters]  -> optimized_model
-    optimized    -> [evaluate_optimized_model]  -> optimized_metrics
-
-O mesmo ``evaluate_model`` avalia os dois modelos: o artefato carrega tudo o
-que a avaliacao precisa.
-"""
+"""Pipeline de modelagem."""
 
 from kedro.pipeline import Node, Pipeline
 

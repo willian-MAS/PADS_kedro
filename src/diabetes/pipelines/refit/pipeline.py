@@ -1,20 +1,4 @@
-"""Pipeline de refit (preparacao dos artefatos de producao).
-
-Repare que todos os nos, menos o ultimo, importam as MESMAS funcoes da
-data_engineering: o que muda sao os parametros (``split_to_fit`` com todos os
-splits). Mesma logica, outra configuracao.
-
-DAG:
-
-    split_diabetes_data  -> [refit_imputers]           -> production_imputers
-    split + imputers     -> [refit_impute]             -> refit_imputed_data
-    refit_imputed        -> [refit_outlier_thresholds] -> production_outlier_thresholds
-    refit_imputed + thr  -> [refit_clip]               -> refit_clipped_data
-    refit_clipped        -> [refit_features]           -> refit_featured_data
-    refit_featured       -> [refit_encoders]           -> production_encoders
-    refit_featured       -> [refit_scalers]            -> production_scalers
-    master_table + otim. -> [refit_model]              -> production_model
-"""
+"""Pipeline de refit: artefatos de producao ajustados em todos os splits."""
 
 from kedro.pipeline import Node, Pipeline
 

@@ -1,14 +1,4 @@
-"""Nos da pipeline de modelagem.
-
-O modelo nao esta escrito no codigo: ele vem do YAML, em ``class_path``.
-Trocar LogisticRegression por RandomForest, XGBoost ou qualquer estimador
-compativel com a API do scikit-learn e mudanca de configuracao.
-
-Os nos devolvem um "artefato de modelo" (dict) em vez de so o estimador. Com
-isso o no de avaliacao recebe junto tudo o que precisa -- coluna alvo, colunas
-de feature e splits de avaliacao -- e a mesma funcao avalia o baseline e o
-modelo otimizado.
-"""
+"""Nos da pipeline de modelagem: treino, busca de hiperparametros e avaliacao."""
 
 import logging
 from typing import Any
@@ -142,9 +132,6 @@ def evaluate_model(
     master_table: pd.DataFrame,
 ) -> dict[str, Any]:
     """Avalia um modelo ajustado em cada split listado no artefato.
-
-    As metricas sao as mesmas que o notebook compara entre modelos:
-    acuracia, recall, precisao, F1 e AUC.
 
     Args:
         model_artifact: Dict produzido por ``train_model`` ou

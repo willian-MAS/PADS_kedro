@@ -1,20 +1,4 @@
-"""API FastAPI que expoe as pipelines Kedro do projeto diabetes como REST.
-
-Tres familias de endpoint:
-
-* **Dados** -- ``GET /datasets`` e ``GET /datasets/{name}`` servem qualquer
-  dataset do Data Catalog como JSON, sem que o cliente precise saber se aquilo
-  esta em CSV, Parquet ou num bucket.
-* **Treino** -- ``POST /train`` dispara data_engineering + modelling + refit
-  em segundo plano e devolve um ``run_id``; ``GET /train/{run_id}`` acompanha.
-* **Inferencia** -- ``POST /inference`` escora registros enviados no corpo da
-  requisicao (sincrono) e ``POST /batch-inference`` roda a pipeline sobre o
-  arquivo declarado no catalogo (assincrono).
-
-O ponto central do desenho: a inferencia online roda **a mesma pipeline** do
-modo batch. O que muda e so a origem dos dados -- o catalogo recebe
-``MemoryDataset`` no lugar dos arquivos, e nada toca o disco.
-"""
+"""API FastAPI que expoe as pipelines Kedro do projeto."""
 
 from __future__ import annotations
 
@@ -47,8 +31,7 @@ PACKAGE_NAME = "diabetes"
 # Pipelines disparadas por POST /train, na ordem.
 TRAIN_PIPELINES = ["data_engineering", "modelling", "refit"]
 
-# Datasets substituidos por MemoryDataset na inferencia online: a requisicao
-# entra e sai pela memoria, sem escrever nos arquivos do modo batch.
+# na inferencia online esses datasets ficam em memoria (nao grava em disco)
 ONLINE_OVERRIDES = [
     "raw_inference_data",
     "cleaned_inference_data",
@@ -60,7 +43,6 @@ ONLINE_OVERRIDES = [
     "inference_predictions",
 ]
 
-# Artefatos sem os quais nao ha inferencia possivel.
 PRODUCTION_ARTIFACTS = [
     "production_imputers",
     "production_outlier_thresholds",
@@ -162,11 +144,7 @@ class RunStatus(BaseModel):
 class InferenceRequest(BaseModel):
     instances: list[dict[str, Any]] = Field(
         ...,
-        description=(
-            "Registros a escorar. Cada um deve trazer as 8 medidas do exame: "
-            "Pregnancies, Glucose, BloodPressure, SkinThickness, Insulin, BMI, "
-            "DiabetesPedigreeFunction e Age."
-        ),
+        description="Registros com as 8 colunas de entrada do modelo.",
         json_schema_extra={
             "example": [
                 {
@@ -252,10 +230,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Diabetes ML API",
-    description=(
-        "Pipelines Kedro de predicao de diabetes expostas como API REST. "
-        "Documentacao interativa em /docs."
-    ),
+    description="Pipelines Kedro de predicao de diabetes.",
     version="0.1.0",
     lifespan=lifespan,
 )
@@ -263,7 +238,7 @@ app = FastAPI(
 
 @app.get("/", include_in_schema=False)
 def root() -> RedirectResponse:
-    """Manda quem abre a raiz direto para a documentacao interativa."""
+    """Redireciona para /docs."""
     return RedirectResponse(url="/docs")
 
 
@@ -312,12 +287,7 @@ def read_dataset(
     limit: int = Query(100, ge=1, le=10_000, description="Maximo de registros"),
     offset: int = Query(0, ge=0, description="Registros a pular"),
 ) -> DatasetResponse:
-    """Serve um dataset do catalogo como JSON.
-
-    O cliente pede pelo nome logico (``master_table``, ``baseline_metrics``,
-    ...) e nao precisa saber onde nem em que formato aquilo esta guardado --
-    e a abstracao do catalogo chegando ate o HTTP.
-    """
+    """Retorna um dataset do catalogo em JSON (paginado)."""
     _ensure_bootstrap()
     try:
         with KedroSession.create(project_path=PROJECT_PATH) as session:
@@ -418,14 +388,7 @@ def get_batch_inference_status(run_id: str) -> RunStatus:
 
 @app.post("/inference", response_model=InferenceResponse)
 def run_inference(request: InferenceRequest) -> InferenceResponse:
-    """Escora registros enviados no corpo da requisicao, de forma sincrona.
-
-    Monta o catalogo a partir do contexto Kedro, troca as entradas e saidas da
-    inferencia por ``MemoryDataset`` e roda a pipeline ``inference`` com o
-    ``SequentialRunner``. E exatamente a mesma pipeline do modo batch: mesmas
-    funcoes de limpeza, imputacao, features, encoding e escalonamento, com os
-    mesmos artefatos de producao.
-    """
+    """Roda a pipeline de inferencia sobre os registros enviados (sincrono)."""
     if not request.instances:
         raise HTTPException(status_code=422, detail="A lista 'instances' esta vazia")
 

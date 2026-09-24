@@ -1,8 +1,4 @@
-"""Testes unitarios dos nos de engenharia de dados.
-
-Nos sao funcoes puras: da para testa-los com DataFrames sinteticos, sem Kedro,
-sem catalogo e sem arquivo nenhum.
-"""
+"""Testes dos nos de engenharia de dados."""
 
 import numpy as np
 import pandas as pd
@@ -88,7 +84,6 @@ class TestCleanData:
         assert df_out["Age"].tolist() == [50, 31]
 
     def test_funciona_sem_a_coluna_alvo(self):
-        """Dados de inferencia podem chegar sem o Outcome."""
         df_in = pd.DataFrame({"Glucose": [120], "BMI": [30.0], "Age": [40]})
 
         df_out = clean_data(df_in, COLUMNS)
@@ -118,7 +113,6 @@ class TestSplit:
 
 class TestImputacao:
     def test_mediana_vem_apenas_do_split_de_treino(self):
-        """O coracao da disciplina: nada de vazar teste/validacao para o treino."""
         df_in = pd.DataFrame(
             {
                 "split": ["train", "train", "train", "test"],
@@ -216,7 +210,6 @@ class TestEncodersEScalers:
         assert set(encoders["NEW_AGE_CAT"].classes_) == {"mature", "senior"}
 
     def test_categoria_desconhecida_nao_derruba_a_inferencia(self):
-        """Em producao a API pode receber qualquer valor: vira -1, nao excecao."""
         treino = pd.DataFrame(
             {"split": ["train", "train"], "NEW_AGE_CAT": ["mature", "senior"]}
         )

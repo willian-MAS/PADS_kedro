@@ -1,9 +1,4 @@
-"""Testes de fumaca do projeto.
-
-Garantem que o projeto Kedro carrega e que o DAG registrado tem a forma
-esperada. Pegam erro de digitacao em nome de dataset ou de parametro antes de
-rodar o pipeline inteiro.
-"""
+"""Testes de fumaca: o projeto carrega e o DAG tem a forma esperada."""
 
 from pathlib import Path
 
@@ -40,7 +35,6 @@ class TestProjetoKedro:
         assert {"clean_data", "refit_model", "predict"} <= nomes
 
     def test_inferencia_so_consome_artefatos_de_producao(self):
-        """A inferencia nunca pode depender de artefato de modelagem."""
         bootstrap_project(Path.cwd())
 
         entradas = set(pipelines["inference"].inputs())

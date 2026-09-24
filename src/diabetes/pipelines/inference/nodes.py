@@ -1,12 +1,4 @@
-"""Nos da pipeline de inferencia.
-
-Reaproveitamento maximo: limpeza, imputacao, tratamento de outliers,
-engenharia de features, encoding e escalonamento sao exatamente as mesmas
-funcoes da data_engineering, so que alimentadas pelos artefatos de PRODUCAO.
-Nada e ajustado aqui -- so duas funcoes sao novas: ``to_dataframe`` (adapta a
-entrada, que pode vir de um CSV ou do corpo JSON de uma requisicao HTTP) e
-``predict``.
-"""
+"""Nos proprios da inferencia (o resto reaproveita a data_engineering)."""
 
 import logging
 from typing import Any

@@ -1,17 +1,6 @@
 """Nos da pipeline de engenharia de dados.
 
-Cada funcao aqui e a traducao de um trecho do notebook
-``diabetes-prediction.ipynb`` para codigo de producao, com duas mudancas de
-fundo em relacao ao original:
-
-1. **Separacao fit/transform.** No notebook, mediana de imputacao, limites de
-   outlier, encoders e scaler sao calculados sobre o dataset inteiro e so
-   depois os dados sao separados em treino e teste. Isso vaza informacao do
-   teste para o treino. Aqui, cada ``fit_*`` aprende somente nas linhas dos
-   splits declarados em ``split_to_fit`` e devolve um artefato; cada
-   ``transform_*`` apenas aplica esse artefato.
-2. **Funcoes puras.** Nenhuma le ou escreve arquivo (isso e papel do Data
-   Catalog) e nenhuma altera o DataFrame de entrada (sempre ``.copy()``).
+Os fit_* ajustam apenas nos splits de `split_to_fit`; os transform_* so aplicam.
 """
 
 import logging
@@ -25,8 +14,7 @@ from diabetes.common import as_list, columns_from_groups, load_class
 
 logger = logging.getLogger(__name__)
 
-# Valor atribuido a uma categoria que o encoder nunca viu no treino. Acontece
-# em producao (a API pode receber qualquer coisa) e nao pode derrubar o servico.
+# codigo usado para categorias que nao apareceram no treino
 UNKNOWN_CATEGORY_CODE = -1
 
 
@@ -36,14 +24,8 @@ def clean_data(
 ) -> pd.DataFrame:
     """Seleciona colunas, converte tipos e marca zeros impossiveis como nulos.
 
-    O dataset Pima usa ``0`` como marcador de ausencia em varias medidas de
-    exame: nenhum paciente vivo tem glicose, pressao, espessura de pele,
-    insulina ou IMC igual a zero (no arquivo de modelagem sao 314 zeros em
-    ``Insulin`` e 192 em ``SkinThickness``). Esses zeros viram ``NaN`` aqui e
-    sao imputados mais adiante, pela mediana aprendida no treino.
-
-    Colunas listadas em ``columns`` que nao existam no DataFrame sao ignoradas,
-    entao a mesma funcao serve para os dados de treino e para os de inferencia.
+    Zeros nas colunas de ``zero_as_missing`` viram NaN (sao faltantes). Colunas
+    ausentes no DataFrame sao ignoradas, entao serve para treino e inferencia.
 
     Args:
         raw_diabetes_data: DataFrame bruto de entrada.
@@ -202,9 +184,7 @@ def fit_outlier_thresholds(
 ) -> dict[str, dict[str, float]]:
     """Calcula os limites de outlier de cada coluna nos splits configurados.
 
-    Replica ``outlier_thresholds`` do notebook: o intervalo interquantil e
-    medido entre os quantis ``q_low`` e ``q_high`` e os limites ficam a
-    ``iqr_factor`` intervalos de distancia.
+    Mesma regra do ``outlier_thresholds`` do notebook.
 
     Args:
         df_in: DataFrame com a coluna ``split``.
@@ -272,15 +252,8 @@ def add_engineered_features(
 ) -> pd.DataFrame:
     """Cria as features derivadas descritas no YAML.
 
-    Quatro tipos de regra, aplicados nesta ordem:
-
-    * ``binned``: faixas de uma coluna numerica (``pd.cut``), por exemplo
-      IMC em Underweight/Healthy/Overweight/Obese;
-    * ``ranged``: dentro ou fora de uma faixa de referencia, por exemplo
-      insulina normal entre 16 e 166;
-    * ``combined``: concatenacao de duas categoricas ja criadas, por exemplo
-      faixa de IMC com faixa etaria;
-    * ``products``: produto de duas numericas (interacoes).
+    Tipos de regra: ``binned`` (faixas com pd.cut), ``ranged`` (dentro/fora de
+    uma faixa), ``combined`` (concatena categoricas) e ``products`` (produto).
 
     Args:
         df_in: DataFrame ja imputado e com outliers truncados.
@@ -345,9 +318,6 @@ def fit_encoders(
 ) -> dict[str, LabelEncoder]:
     """Ajusta um LabelEncoder por coluna categorica nos splits configurados.
 
-    So as linhas dos splits em ``params["split_to_fit"]`` sao usadas, o que
-    impede vazamento de rotulos de teste ou validacao.
-
     Args:
         df_in: DataFrame com a coluna ``split`` e as categoricas ja criadas.
         columns: Dicionario de grupos de colunas.
@@ -376,8 +346,7 @@ def transform_encoders(
 ) -> pd.DataFrame:
     """Aplica os encoders ajustados, trocando categorias por inteiros.
 
-    Categorias que o encoder nunca viu (possivel em producao, quando a API
-    recebe um registro novo) viram ``-1`` em vez de derrubar a execucao.
+    Categorias nao vistas no treino viram -1.
 
     Args:
         df_in: DataFrame com as colunas a encodar.
@@ -412,9 +381,6 @@ def fit_scalers(
     params: dict[str, Any],
 ) -> dict[str, Any]:
     """Ajusta um scaler por coluna numerica nos splits configurados.
-
-    A classe do scaler vem do YAML (``class_path``); o notebook usa
-    ``RobustScaler``, que e menos sensivel a valores extremos.
 
     Args:
         df_in: DataFrame com a coluna ``split``.
