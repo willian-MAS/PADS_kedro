@@ -61,12 +61,6 @@ Swagger em http://localhost:8000/docs.
 | `GET /batch-inference/{run_id}` | status da inferencia em lote |
 | `POST /inference` | predicao para registros enviados no corpo |
 
-Exemplo:
-
-```bash
-curl -X POST http://localhost:8000/inference -H "Content-Type: application/json" \
-  -d '{"instances":[{"Pregnancies":6,"Glucose":148,"BloodPressure":72,"SkinThickness":35,"Insulin":0,"BMI":33.6,"DiabetesPedigreeFunction":0.627,"Age":50}]}'
-```
 
 ## Docker
 
@@ -74,9 +68,7 @@ curl -X POST http://localhost:8000/inference -H "Content-Type: application/json"
 docker compose up --build
 ```
 
-A API sobe em http://localhost:8000. Se ainda nao houver modelos em
-`data/06_models`, rode `POST /train` primeiro (ou `uv run kedro run` antes de
-subir o container, ja que `data/` e montado como volume).
+A API sobe em http://localhost:8000. 
 
 ## Testes
 
