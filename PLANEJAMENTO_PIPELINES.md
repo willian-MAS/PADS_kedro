@@ -9,8 +9,8 @@ glicose, combinacoes idade x IMC e idade x glicose, score de insulina e os
 produtos glicose x insulina e glicose x gravidez), faz encoding, aplica
 RobustScaler e compara 9 modelos com GridSearchCV.
 
-O principal problema para producao e que mediana, limites de outlier,
-encoders e scaler sao calculados com a base inteira antes do
+O principal problema para producao é que mediana, limites de outlier,
+encoders e scaler são calculados com a base inteira antes do
 `train_test_split`, ou seja, com vazamento de informacao do teste. Alem disso
 nada disso fica salvo para ser aplicado em um registro novo.
 
